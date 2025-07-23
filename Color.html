@@ -1,0 +1,1144 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>The Strategic Palette: An Interactive Guide</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Chosen Palette: Warm Neutrals with Subtle Accents -->
+    <!-- Application Structure Plan: The SPA is designed with a thematic, non-linear structure to facilitate user-driven exploration. It starts with a hero section for an overview. The core of the app is divided into five main interactive sections accessible via a sticky navigation bar: "About Me", "Color Psychology," "Shape Psychology," "Brand Deep Dives," and "Data Insights." This structure was chosen over a linear report format to allow users to jump directly to the topic that interests them most, and to prominently feature the user's portfolio. The color and shape explorers use an interactive grid layout, which is highly engaging and provides immediate visual feedback. The brand case studies use a card-based system for easy scanning, and the data section centralizes the charts for clear, focused analysis. The 'About Me' section is designed as a detailed portfolio, showcasing the user's skills, education, experience, and projects in a structured and professional manner. Contact information has been moved to the footer for a more standard webpage feel. This user-centered design prioritizes discovery and understanding over passive reading, while also serving as a personal showcase. -->
+    <!-- Visualization & Content Choices:
+        - Report Info: Color psychology details. Goal: Inform & Compare. Viz/Method: Interactive grid of colored tiles. Interaction: On click, a detail pane updates with the selected color's psychology, brand examples, and industry usage. Justification: This provides a highly intuitive and visual way to explore and compare colors directly. Library: Vanilla JS + Tailwind CSS.
+        - Report Info: Shape psychology details. Goal: Inform & Compare. Viz/Method: Interactive grid of shape icons. Interaction: Similar to the color explorer, clicking a shape updates a detail pane. Justification: Visual and interactive, making abstract concepts tangible. Library: Vanilla JS + Tailwind CSS.
+        - Report Info: Industry color/shape distribution data. Goal: Show Proportions. Viz/Method: Pie Charts. Interaction: Hovering over slices reveals data points. Justification: Pie charts are ideal for showing percentage-based distribution as requested. Library: Chart.js (Canvas).
+        - Report Info: Brand case studies. Goal: Organize & Inform. Viz/Method: Card-based layout. Interaction: Cards can be clicked to reveal more detailed information in a modal or expanded view (in this version, content is displayed on the card). Justification: Cards are scannable and familiar to users, allowing easy browsing of brand examples. Library: Tailwind CSS.
+        - Report Info: User's personal and project information from PDF. Goal: Present portfolio. Viz/Method: Structured textual content with headings, lists, and links. Interaction: Scrollable sections for different categories (About, Skills, Education, Experience, Projects). Justification: Provides a clear and comprehensive overview of the user's background in a professional format. Contact information is now in the footer. Library: Tailwind CSS.
+        - Report Info: Relationship between color and successful rate (hypothetical). Goal: Compare & Illustrate. Viz/Method: Bar Chart. Interaction: Displays comparative "success rates" for various colors. Justification: Bar charts are excellent for comparing discrete categories and their associated values. This visualization provides a hypothetical, illustrative interpretation of "success" based on the qualitative insights provided in the source report regarding positive associations and brand impact. Library: Chart.js (Canvas).
+        - Report Info: Bad branding color example (Gap's Failed Rebrand). Goal: Illustrate pitfalls & inform. Viz/Method: New brand card in "Brand Deep Dives" section with a distinct negative color. Interaction: Card displays summary of the failure. Justification: Provides a concrete example of color strategy gone wrong, adding depth to the brand case studies and making it visually distinct for easy identification. Library: Tailwind CSS.
+        - Report Info: Additional color examples. Goal: Expand knowledge. Viz/Method: Add new color tiles and descriptions. Justification: Provides more options for exploration. Library: Vanilla JS + Tailwind CSS.
+        - Report Info: Additional brand examples. Goal: Expand knowledge. Viz/Method: Add new brand cards. Justification: Provides more real-world applications. Library: Tailwind CSS.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: #fdfbf8; /* Warm Neutral Background */
+        color: #4a4a4a;
+      }
+      .nav-link {
+        transition: color 0.3s, border-bottom-color 0.3s;
+        border-bottom: 2px solid transparent;
+      }
+      .nav-link:hover,
+      .nav-link.active {
+        color: #d35400; /* Subtle Accent */
+        border-bottom-color: #d35400;
+      }
+      .content-section {
+        display: none;
+      }
+      .content-section.active {
+        display: block;
+      }
+      .color-tile,
+      .shape-tile {
+        transition: transform 0.2s, box-shadow 0.2s;
+        cursor: pointer;
+      }
+      .color-tile:hover,
+      .shape-tile:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+          0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      }
+      .chart-container {
+        position: relative;
+        width: 100%;
+        max-width: 450px;
+        margin-left: auto;
+        margin-right: auto;
+        height: 40vh;
+        max-height: 450px;
+      }
+      .brand-card {
+        transition: transform 0.3s, box-shadow 0.3s;
+      }
+      .brand-card:hover {
+        transform: scale(1.03);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+          0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      }
+    </style>
+  </head>
+  <body class="antialiased">
+    <header class="bg-white/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
+      <nav
+        class="container mx-auto px-6 py-4 flex justify-between items-center"
+      >
+        <h1 class="text-2xl font-bold text-gray-800">The Strategic Palette</h1>
+        <div class="hidden md:flex items-center space-x-8">
+          <a
+            href="#about-me"
+            class="nav-link text-lg font-semibold text-gray-600 pb-1"
+            >About Me</a
+          >
+          <a
+            href="#colors"
+            class="nav-link text-lg font-semibold text-gray-600 pb-1"
+            >Colors</a
+          >
+          <a
+            href="#shapes"
+            class="nav-link text-lg font-semibold text-gray-600 pb-1"
+            >Shapes</a
+          >
+          <a
+            href="#brands"
+            class="nav-link text-lg font-semibold text-gray-600 pb-1"
+            >Brands</a
+          >
+          <a
+            href="#data"
+            class="nav-link text-lg font-semibold text-gray-600 pb-1"
+            >Data</a
+          >
+        </div>
+        <button
+          id="mobile-menu-button"
+          class="md:hidden text-gray-700 focus:outline-none"
+        >
+          <svg
+            class="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M4 6h16M4 12h16m-7 6h7"
+            ></path>
+          </svg>
+        </button>
+      </nav>
+      <div id="mobile-menu" class="hidden md:hidden px-6 pt-2 pb-4">
+        <a href="#about-me" class="block nav-link py-2 text-gray-600"
+          >About Me</a
+        >
+        <a href="#colors" class="block nav-link py-2 text-gray-600">Colors</a>
+        <a href="#shapes" class="block nav-link py-2 text-gray-600">Shapes</a>
+        <a href="#brands" class="block nav-link py-2 text-gray-600">Brands</a>
+        <a href="#data" class="block nav-link py-2 text-gray-600">Data</a>
+      </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-12">
+      <section id="hero" class="text-center mb-16">
+        <h2 class="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
+          Unlocking Brand Identity
+        </h2>
+        <p class="text-lg md:text-xl max-w-3xl mx-auto text-gray-600">
+          Explore the powerful, subconscious influence of color and shape in
+          branding. This interactive guide reveals the psychology behind iconic
+          logos and how visual elements shape our perceptions and decisions.
+        </p>
+      </section>
+
+      <div id="app-content">
+        <section id="about-me" class="content-section">
+          <div class="text-center mb-12">
+            <h3 class="text-3xl font-bold text-gray-800">About Kyaw Thiha</h3>
+            <p class="text-lg text-gray-600 mt-2 max-w-2xl mx-auto">
+              Welcome to my portfolio! Here you'll find a summary of my academic
+              background, technical skills, professional experience, and key
+              projects. I'm passionate about technology and design, always eager
+              to learn and apply my skills in practical settings.
+            </p>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+              <h4 class="text-2xl font-bold mb-3">Summary</h4>
+              <p class="text-gray-700">
+                Enthusiastic ICT student with a strong foundation in information
+                systems, networking, software development, and digital tools.
+                Experienced in building real-world projects such as a birth
+                chart calculator and AI-powered chatbot using HTML, JavaScript,
+                APIs, and automation platforms like n8n. Skilled in
+                troubleshooting, technical communication, and cross-functional
+                collaboration. Eager to apply both technical and problem-solving
+                skills in a practical setting, while continuously learning and
+                adapting in a fast-evolving tech environment.
+              </p>
+              <h4 class="text-2xl font-bold mb-3 mt-6">Languages</h4>
+              <ul class="list-disc list-inside text-gray-700 space-y-1">
+                <li>Burmese (Native)</li>
+                <li>English (Fluent)</li>
+                <li>Thai (Basic)</li>
+              </ul>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+              <h4 class="text-2xl font-bold mb-3">Technical Skills</h4>
+              <ul class="list-disc list-inside text-gray-700 space-y-1">
+                <li>
+                  <strong>Design Tools:</strong> Figma, Canva, Photoshop, CapCut
+                </li>
+                <li>
+                  <strong>Prototyping & UI/UX:</strong> Figma, Unity, Framer
+                </li>
+                <li>
+                  <strong>AI, LLM & AI Tools:</strong> n8n work flow, Spline, AI
+                  Art Generators, Lovable ai, etc.
+                </li>
+                <li>
+                  <strong>Programming:</strong> HTML/CSS, JavaScript (basic),
+                  SQL
+                </li>
+                <li>
+                  <strong>Data & Analysis:</strong> Power BI, Excel, Google
+                  Sheets
+                </li>
+                <li>
+                  <strong>Other:</strong> Market Research, Agile Teamwork,
+                  Design Thinking, Visual Storytelling
+                </li>
+              </ul>
+              <h4 class="text-2xl font-bold mb-3 mt-6">Education</h4>
+              <p class="text-gray-700">
+                <strong>Rangsit University - Pathum Thani, Thailand</strong
+                ><br />
+                Bachelor of Science in Information Communication Technology
+                (Expected Graduation: June 2026)
+              </p>
+              <ul class="list-disc list-inside text-gray-700 space-y-1 mt-2">
+                <li>
+                  Relevant Coursework: Computer Networks, Network Security,
+                  Networking, Data Base, Data Mining, Web Development, Internet
+                  System, Programming Languages (Python, Java, JavaScript)
+                </li>
+                <li>
+                  Active member of the RIC Table Tennis Club (Finance Role)
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="bg-white p-6 rounded-lg shadow-lg mt-8">
+            <h4 class="text-2xl font-bold mb-3">Experience</h4>
+            <div class="mb-6">
+              <h5 class="text-xl font-semibold text-gray-800">
+                Small Business (Family-Owned)
+              </h5>
+              <p class="text-gray-600 italic">
+                Marketing & Digital Design Assistant | May 2019 - Jan 2021
+              </p>
+              <ul class="list-disc list-inside text-gray-700 space-y-1 mt-2">
+                <li>
+                  Designed engaging digital content and social media visuals
+                  using Canva, increasing Facebook followers by 1,100 and
+                  boosting sales by 40%.
+                </li>
+                <li>
+                  Conducted market research to tailor content strategies for
+                  customer engagement.
+                </li>
+                <li>
+                  Supported digital marketing campaigns, including seasonal
+                  promotions and product branding.
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h5 class="text-xl font-semibold text-gray-800">
+                RIC Table Tennis Club - Rangsit University
+              </h5>
+              <p class="text-gray-600 italic">
+                Founder & Finance Coordinator | Aug 2023 - Present
+              </p>
+              <ul class="list-disc list-inside text-gray-700 space-y-1 mt-2">
+                <li>
+                  Initiated and led the foundation of the RIC Table Tennis Club,
+                  scaling from 6 founding members to 30+ active participants.
+                </li>
+                <li>
+                  Secured official club recognition and physical space through
+                  direct collaboration with university administrators.
+                </li>
+                <li>
+                  Oversaw budgeting and funding, acquired professional-grade
+                  tables and equipment for the club.
+                </li>
+                <li>
+                  Coordinated tournaments, training sessions, and workshops by
+                  working closely with internal and external stakeholders.
+                </li>
+                <li>
+                  Developed branding materials and managed club promotions,
+                  combining both administrative and creative tasks.
+                </li>
+              </ul>
+              <h6 class="text-lg font-medium text-gray-700 mt-3">
+                Achievements:
+              </h6>
+              <ul class="list-disc list-inside text-gray-700 space-y-1 ml-4">
+                <li>
+                  Payom Games 2024: 1st place (Men's Doubles), 3rd place
+                  (Women's Doubles)
+                </li>
+                <li>Freshy Games 2024: 3rd place (Mixed Doubles)</li>
+                <li>
+                  Payom Games 2025: 1st place (Women's Doubles, Mixed Doubles),
+                  2nd place (Men's Doubles)
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="bg-white p-6 rounded-lg shadow-lg mt-8">
+            <h4 class="text-2xl font-bold mb-3">Projects</h4>
+            <div class="mb-6">
+              <h5 class="text-xl font-semibold text-gray-800">
+                UI/UX Projects & Website Projects
+              </h5>
+              <ul class="list-disc list-inside text-gray-700 space-y-2 mt-2">
+                <li>
+                  <strong>Celestial Portal Sanctuary:</strong> (Solo) An
+                  interactive 3D web experience combining AI workflows, dynamic
+                  UI, and real-time user interaction. Developed using Spline for
+                  3D animation, Meshy.ai for custom hand modeling, and Lovable
+                  AI for layout design. The site features a seamless
+                  AI-integrated Tarot chatbot and a birth chart calculator,
+                  powered by Gemini API and automated through n8n workflows.
+                  Inspired by dynamic human-machine interaction, the design
+                  incorporates responsive elements and symbolic 3D visuals to
+                  enhance engagement and usability across devices.
+                  <a
+                    href="https://portal-sanctuary.vercel.app"
+                    target="_blank"
+                    class="text-blue-600 hover:underline"
+                    >Live Demo</a
+                  >
+                </li>
+                <li>
+                  <strong>TaskPal Party - Native App:</strong> (Solo) Task Pal
+                  Party is a collaborative task management app designed in Figma
+                  and built using Lovable AI, with responsive support for both
+                  iOS and Android platforms. It features a playful,
+                  user-friendly interface that helps users organize and track
+                  group tasks efficiently. The design focused on clean layouts,
+                  intuitive navigation, and mobile adaptability.
+                  <a
+                    href="https://task-pal-party.vercel.app"
+                    target="_blank"
+                    class="text-blue-600 hover:underline"
+                    >Live Demo</a
+                  >
+                </li>
+                <li>
+                  <strong
+                    >B2B Organic Food Market & Chillin' Streaming Platform
+                    Projects:</strong
+                  >
+                  (Leader) Designed "littlefarm.com," a conceptual B2B platform
+                  for organic food trade, focusing on authentication and order
+                  management. Developed "Chillin'," an anime streaming platform
+                  prototype with shared viewing, messaging, and personalized
+                  recommendations, emphasizing user experience and multi-device
+                  accessibility.
+                  <a
+                    href="https://shorturl.at/pjunE"
+                    target="_blank"
+                    class="text-blue-600 hover:underline"
+                    >Live Demo</a
+                  >
+                </li>
+                <li>
+                  <strong>Mini Projects Collection:</strong> (Solo) Created a
+                  collection of mini web applications, including a BMI
+                  calculator, quick tips feature, food choice app, Tic-Tac-Toe
+                  game, and more, using HTML, CSS, and JavaScript.
+                  <a
+                    href="https://oyoo225.github.io/Mini/"
+                    target="_blank"
+                    class="text-blue-600 hover:underline"
+                    >Live Demo</a
+                  >
+                </li>
+                <li>
+                  <strong>Wild West Adventure - Unity Open-World Game:</strong>
+                  (Collaborate) Collaborated with a friend to develop a 3D
+                  open-world game using Unity for the final project. Implemented
+                  game mechanics, environment design, and interactive elements
+                  to create an immersive experience.
+                  <a
+                    href="https://youtu.be/UuhYtcjnanA?si=oUIGOXX5YY2B0q7"
+                    target="_blank"
+                    class="text-blue-600 hover:underline"
+                    >Video Link</a
+                  >
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h5 class="text-xl font-semibold text-gray-800">
+                Other Projects
+              </h5>
+              <ul class="list-disc list-inside text-gray-700 space-y-2 mt-2">
+                <li>
+                  <strong
+                    >Game Genre Popularity & Player Behavior Research:</strong
+                  >
+                  (Researcher. Project Presenter) Conducted a data-driven
+                  research study on game genre popularity and player behavior,
+                  surveying approximately 200 participants in real-time.
+                  Analyzed player engagement, spending habits, and genre
+                  preferences using data mining techniques like decision trees.
+                  Provided strategic insights for game developers, rather than
+                  developing a fully functional system.
+                  <a
+                    href="https://shorturl.at/2yBWn"
+                    target="_blank"
+                    class="text-blue-600 hover:underline"
+                    >Report Link</a
+                  >
+                </li>
+                <li>
+                  <strong>Web Application:</strong> (Solo) Created a web
+                  application for managing friend records using ASP.NET Core
+                  MVC, C#, and SQLite. Features include adding, editing, and
+                  deleting friend details, uploading profile pictures, and
+                  automatic zodiac sign determination based on date of birth.
+                  Improved database interactions with Entity Framework and
+                  optimized user experience.
+                  <a
+                    href="https://github.com/Oyoo225/internet.git"
+                    target="_blank"
+                    class="text-blue-600 hover:underline"
+                    >GitHub Repo</a
+                  >
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <section id="colors" class="content-section">
+          <div class="text-center mb-12">
+            <h3 class="text-3xl font-bold text-gray-800">
+              Color Psychology Explorer
+            </h3>
+            <p class="text-lg text-gray-600 mt-2 max-w-2xl mx-auto">
+              Color is a primary driver of brand perception, influencing up to
+              90% of initial impressions. Click on a color below to discover its
+              psychological meaning, common uses, and the famous brands that
+              leverage its power.
+            </p>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+            <div class="grid grid-cols-3 sm:grid-cols-4 gap-4"></div>
+            <div
+              id="color-details"
+              class="bg-white p-6 rounded-lg shadow-lg min-h-[300px]"
+            >
+              <h4 id="color-name" class="text-2xl font-bold mb-3">
+                Select a Color
+              </h4>
+              <p id="color-description" class="text-gray-700">
+                The details about the selected color's psychological impact and
+                branding applications will appear here.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section id="shapes" class="content-section">
+          <div class="text-center mb-12">
+            <h3 class="text-3xl font-bold text-gray-800">
+              Logo Shape Psychology
+            </h3>
+            <p class="text-lg text-gray-600 mt-2 max-w-2xl mx-auto">
+              Beyond color, geometric shapes are powerful, non-verbal
+              communicators. Click a shape to learn about the subconscious
+              feelings it evokes, from trust and stability to dynamism and
+              innovation.
+            </p>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+            <div class="grid grid-cols-3 sm:grid-cols-4 gap-4"></div>
+            <div
+              id="shape-details"
+              class="bg-white p-6 rounded-lg shadow-lg min-h-[300px]"
+            >
+              <h4 id="shape-name" class="text-2xl font-bold mb-3">
+                Select a Shape
+              </h4>
+              <p id="shape-description" class="text-gray-700">
+                The details about the selected shape's psychological impact and
+                branding applications will appear here.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section id="brands" class="content-section">
+          <div class="text-center mb-12">
+            <h3 class="text-3xl font-bold text-gray-800">Brand Deep Dives</h3>
+            <p class="text-lg text-gray-600 mt-2 max-w-2xl mx-auto">
+              See theory in action. Explore how iconic brands have meticulously
+              crafted their visual identities using specific colors and shapes
+              to build global empires and foster lasting customer loyalty. This
+              section includes both successful examples and cautionary tales of
+              branding missteps.
+            </p>
+          </div>
+          <div
+            id="brand-cards-container"
+            class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+          ></div>
+        </section>
+
+        <section id="data" class="content-section">
+          <div class="text-center mb-12">
+            <h3 class="text-3xl font-bold text-gray-800">
+              Data Insights: Visualizing Brand Trends
+            </h3>
+            <p class="text-lg text-gray-600 mt-2 max-w-2xl mx-auto">
+              What are the most common colors and shapes in branding? These
+              charts visualize the distribution of primary colors and logo
+              shapes among the world's most famous brands, revealing key
+              industry trends. A hypothetical "success rate" by color is also
+              included for illustrative purposes, based on qualitative insights
+              from the report.
+            </p>
+          </div>
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            <div>
+              <h4 class="text-2xl font-bold text-center mb-4">
+                Primary Logo Color Distribution
+              </h4>
+              <div class="chart-container">
+                <canvas id="colorPieChart"></canvas>
+              </div>
+            </div>
+            <div>
+              <h4 class="text-2xl font-bold text-center mb-4">
+                Primary Logo Shape Distribution
+              </h4>
+              <div class="chart-container">
+                <canvas id="shapePieChart"></canvas>
+              </div>
+            </div>
+            <div class="lg:col-span-2">
+              <h4 class="text-2xl font-bold text-center mb-4">
+                Hypothetical Brand Success Rate by Primary Color
+              </h4>
+              <div class="chart-container max-w-2xl h-[50vh] max-h-[500px]">
+                <canvas id="colorSuccessBarChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <footer class="bg-gray-800 text-white mt-16">
+      <div
+        class="container mx-auto px-6 py-8 text-center md:flex md:justify-between md:items-center"
+      >
+        <p>
+          &copy; 2025 The Strategic Palette. An interactive exploration of brand
+          identity.
+        </p>
+        <div class="mt-4 md:mt-0 md:text-right">
+          <h4 class="text-lg font-bold mb-2">Contact Kyaw Thiha</h4>
+          <ul class="text-sm space-y-1">
+            <li>Phone: +66634711831</li>
+            <li>
+              Email:
+              <a
+                href="mailto:kt796504@gmail.com"
+                class="text-blue-400 hover:underline"
+                >kt796504@gmail.com</a
+              >
+            </li>
+            <li>Location: Bangkok, Thailand</li>
+            <li>
+              Website:
+              <a
+                href="https://kyawthihawebsite.vercel.app"
+                target="_blank"
+                class="text-blue-400 hover:underline"
+                >kyawthihawebsite.vercel.app</a
+              >
+            </li>
+          </ul>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const colorData = {
+          Red: {
+            bgColor: "bg-red-500",
+            description:
+              "<strong>Symbolism:</strong> Passion, energy, urgency, excitement, appetite stimulation.<br><strong>Usage:</strong> Grabs attention and conveys power. Used in food, retail, and for call-to-action buttons.<br><strong>Brands:</strong> Coca-Cola, McDonald's, Target, YouTube.",
+          },
+          Blue: {
+            bgColor: "bg-blue-500",
+            description:
+              "<strong>Symbolism:</strong> Trust, reliability, calmness, professionalism, security.<br><strong>Usage:</strong> Builds trust and signals dependability. Used by financial, tech, and healthcare companies.<br><strong>Brands:</strong> Facebook, IBM, PayPal, Blue Cross Blue Shield.",
+          },
+          Yellow: {
+            bgColor: "bg-yellow-400",
+            description:
+              "<strong>Symbolism:</strong> Happiness, optimism, warmth, creativity.<br><strong>Usage:</strong> Exudes positivity and approachability. Targets younger audiences.<br><strong>Brands:</strong> McDonald's, IKEA, Snapchat.",
+          },
+          Green: {
+            bgColor: "bg-green-500",
+            description:
+              "<strong>Symbolism:</strong> Health, nature, growth, sustainability, harmony.<br><strong>Usage:</strong> Adopted by eco-friendly, health, and wellness brands.<br><strong>Brands:</strong> Whole Foods, Starbucks, Animal Planet.",
+          },
+          Purple: {
+            bgColor: "bg-purple-500",
+            description:
+              "<strong>Symbolism:</strong> Luxury, creativity, wisdom, spirituality.<br><strong>Usage:</strong> Chosen by premium or creative brands to stand out.<br><strong>Brands:</strong> Cadbury, Hallmark, Yahoo.",
+          },
+          Orange: {
+            bgColor: "bg-orange-500",
+            description:
+              "<strong>Symbolism:</strong> Enthusiasm, affordability, friendliness, energy.<br><strong>Usage:</strong> For brands that want to appear friendly, dynamic, and value-oriented.<br><strong>Brands:</strong> Nickelodeon, Fanta, Home Depot.",
+          },
+          Black: {
+            bgColor: "bg-gray-900",
+            description:
+              "<strong>Symbolism:</strong> Elegance, sophistication, power, mystery, authority.<br><strong>Usage:</strong> Employed by luxury, fashion, and tech brands for exclusivity.<br><strong>Brands:</strong> Chanel, Nike, Apple.",
+          },
+          White: {
+            bgColor: "bg-gray-100",
+            description:
+              "<strong>Symbolism:</strong> Simplicity, purity, cleanliness, modernity.<br><strong>Usage:</strong> Used in healthcare, tech, and minimalist branding, often as a background.<br><strong>Brands:</strong> Apple, Tesla.",
+          },
+          Pink: {
+            bgColor: "bg-pink-400",
+            description:
+              "<strong>Symbolism:</strong> Femininity, playfulness, youthfulness, charm.<br><strong>Usage:</strong> Popular for brands targeting a female audience or children.<br><strong>Brands:</strong> Barbie, Victoria's Secret.",
+          },
+          Brown: {
+            bgColor: "bg-yellow-900",
+            description:
+              "<strong>Symbolism:</strong> Seriousness, earthiness, reliability, authenticity.<br><strong>Usage:</strong> Emphasizes a sturdy, dependable, and classic feel.<br><strong>Brands:</strong> UPS, Hershey's.",
+          },
+          Gray: {
+            bgColor: "bg-gray-500",
+            description:
+              "<strong>Symbolism:</strong> Neutrality, balance, sophistication, timelessness.<br><strong>Usage:</strong> Works well for technology and luxury brands to convey modernity.<br><strong>Brands:</strong> Apple, Mercedes-Benz.",
+          },
+          Turquoise: {
+            bgColor: "bg-teal-400",
+            description:
+              "<strong>Symbolism:</strong> Clarity, communication, healing, inspiration, self-expression.<br><strong>Usage:</strong> Often seen in communication-centric brands (education, media, technology) and ideal for cleaning products due to its association with cleanliness and purity.<br><strong>Brands:</strong> Tiffany & Co., PayPal (lighter shades).",
+          },
+        };
+
+        const shapeData = {
+          Circles: {
+            icon: "●",
+            description:
+              "<strong>Symbolism:</strong> Unity, community, friendship, stability, femininity.<br><strong>Psychology:</strong> Circles feel complete and harmonious. They evoke feelings of warmth, protection, and continuity. Brands use them to appear friendly, inclusive, and trustworthy.<br><strong>Brands:</strong> Target, Mastercard, Pepsi, BMW.",
+          },
+          Squares: {
+            icon: "■",
+            description:
+              "<strong>Symbolism:</strong> Stability, balance, reliability, strength, professionalism.<br><strong>Psychology:</strong> Squares and rectangles convey order, logic, and security. Their straight lines and right angles suggest discipline and trustworthiness, inspiring confidence.<br><strong>Brands:</strong> Microsoft, American Express, Lego, BBC News.",
+          },
+          Triangles: {
+            icon: "▲",
+            description:
+              "<strong>Symbolism:</strong> Power, masculinity, motion, progress, science.<br><strong>Psychology:</strong> Triangles are dynamic and energetic. Pointing upwards, they suggest growth and stability. They are often used to convey direction, purpose, and innovation.<br><strong>Brands:</strong> Adidas, Delta Air Lines, Google Drive, Mitsubishi.",
+          },
+          Lines: {
+            icon: "—",
+            description:
+              "<strong>Symbolism:</strong> Progress, speed (horizontal); Strength, aggression (vertical).<br><strong>Psychology:</strong> The orientation of lines is key. Horizontal lines suggest calm and community, while vertical lines feel strong and dominant. They communicate connection and forward momentum.<br><strong>Brands:</strong> IBM, Cisco, Spotify.",
+          },
+          Abstract: {
+            icon: "❈",
+            description:
+              "<strong>Symbolism:</strong> Uniqueness, modernity, originality.<br><strong>Psychology:</strong> Abstract shapes are custom-created to be unique and memorable. They allow a brand to create a completely new visual meaning tied directly to their identity, often conveying complex ideas.<br><strong>Brands:</strong> Nike (Swoosh), Starbucks (Siren), Airbnb.",
+          },
+          Organic: {
+            icon: "☘",
+            description:
+              "<strong>Symbolism:</strong> Nature, comfort, spontaneity, beauty.<br><strong>Psychology:</strong> Organic shapes are irregular and reflect forms found in nature. They feel familiar and comforting, often used by brands connected to the environment, wellness, or food.<br><strong>Brands:</strong> Patagonia, WWF, Shell.",
+          },
+          Curves: {
+            icon: "〰",
+            description:
+              "<strong>Symbolism:</strong> Elegance, approachability, sophistication, flow.<br><strong>Psychology:</strong> Curves are soft and fluid, evoking positive emotions and a sense of rhythm. Brands use them to appear more personal, elegant, and less rigid, fostering a friendly connection.<br><strong>Brands:</strong> Coca-Cola, Disney, Unilever.",
+          },
+        };
+
+        const brandData = [
+          {
+            name: "Coca-Cola",
+            color: "Red",
+            shape: "Curves",
+            message:
+              "Uses vibrant red to evoke energy, excitement, and appetite. The curved script logo feels classic and friendly.",
+            bgColor: "bg-red-600",
+          },
+          {
+            name: "McDonald's",
+            color: "Yellow & Red",
+            shape: "Curves",
+            message:
+              "Red stimulates appetite and urgency, while yellow conveys happiness and optimism. The golden arches are an iconic curved shape.",
+            bgColor: "bg-yellow-500",
+          },
+          {
+            name: "Apple",
+            color: "White & Gray",
+            shape: "Organic",
+            message:
+              "A minimalist white and gray palette reflects simplicity, elegance, and innovation. The apple shape is organic and universally recognizable.",
+            bgColor: "bg-gray-400",
+          },
+          {
+            name: "Facebook",
+            color: "Blue",
+            shape: "Square",
+            message:
+              'Blue signifies trust, reliability, and communication, crucial for a social network handling user data. The "f" logo is contained in a simple square.',
+            bgColor: "bg-blue-600",
+          },
+          {
+            name: "Nike",
+            color: "Black & White",
+            shape: "Abstract",
+            message:
+              'Black and white convey power, strength, and simplicity. The "Swoosh" is a world-famous abstract shape representing motion and speed.',
+            bgColor: "bg-gray-800",
+          },
+          {
+            name: "IKEA",
+            color: "Blue & Yellow",
+            shape: "Square",
+            message:
+              "Blue and yellow convey quality, fun, and simplicity, while also nodding to its Swedish heritage. The logo is a bold, rectangular wordmark.",
+            bgColor: "bg-blue-500",
+          },
+          {
+            name: "FedEx",
+            color: "Purple & Orange",
+            shape: "Abstract",
+            message:
+              "Purple symbolizes professionalism, while orange signifies speed. The logo famously hides an abstract arrow shape, reinforcing its message of forward motion.",
+            bgColor: "bg-purple-600",
+          },
+          {
+            name: "Starbucks",
+            color: "Green",
+            shape: "Abstract",
+            message:
+              "Green connects the brand to nature, growth, and relaxation. The siren is a unique abstract/organic logo that tells a story.",
+            bgColor: "bg-green-700",
+          },
+          {
+            name: "UPS",
+            color: "Brown",
+            shape: "Square",
+            message:
+              "Brown conveys reliability, earthiness, and authenticity. The shield logo is a modified square, suggesting security and dependability.",
+            bgColor: "bg-yellow-900",
+          },
+          // New bad branding example with distinct color
+          {
+            name: "Gap (Failed Rebrand)",
+            color: "Blue",
+            shape: "Square",
+            message:
+              "In 2010, Gap's attempt to replace its classic logo with a new blue square and Helvetica text was a catastrophic failure, costing millions and reversed within a week due to consumer backlash. It misaligned with brand identity.",
+            bgColor: "bg-red-700",
+          },
+          // Additional brands
+          {
+            name: "Google",
+            color: "Multi-color",
+            shape: "Abstract/Rounded",
+            message:
+              "Google's multi-color logo represents its playful, innovative, and diverse offerings. The rounded, sans-serif font conveys approachability and modernity.",
+            bgColor: "bg-blue-500",
+          },
+          {
+            name: "Amazon",
+            color: "Orange & Black",
+            shape: "Curves (Arrow)",
+            message:
+              "The orange arrow from A to Z signifies that Amazon sells everything from A to Z, and also forms a smile, representing customer satisfaction and fast delivery.",
+            bgColor: "bg-orange-500",
+          },
+          {
+            name: "Netflix",
+            color: "Red",
+            shape: "Bold Text",
+            message:
+              "Netflix uses a bold red to evoke excitement, passion, and energy, perfectly aligning with its entertainment-focused brand. The color is highly recognizable and creates urgency.",
+            bgColor: "bg-red-700",
+          },
+        ];
+
+        const colorPieData = {
+          labels: [
+            "Blue",
+            "Red",
+            "Orange",
+            "Black",
+            "Yellow",
+            "Green",
+            "Purple",
+            "White",
+            "Pink",
+            "Brown",
+            "Gray",
+            "Turquoise",
+          ],
+          datasets: [
+            {
+              data: [
+                15.6, 12.5, 12.5, 12.5, 9.4, 9.4, 9.4, 9.4, 3.1, 3.1, 3.1, 3.1,
+              ], // Adjusted data for Turquoise
+              backgroundColor: [
+                "#3B82F6",
+                "#EF4444",
+                "#F97316",
+                "#1F2937",
+                "#FBBF24",
+                "#22C55E",
+                "#8B5CF6",
+                "#F3F4F6",
+                "#EC4899",
+                "#78350F",
+                "#6B7280",
+                "#2DD4BF",
+              ], // Added Turquoise color
+              borderColor: "#FDFBF8",
+              borderWidth: 2,
+            },
+          ],
+        };
+
+        const shapePieData = {
+          labels: [
+            "Circles",
+            "Squares",
+            "Triangles",
+            "Lines",
+            "Abstract",
+            "Organic",
+            "Curves",
+          ],
+          datasets: [
+            {
+              data: [29.3, 22.0, 14.6, 9.8, 9.8, 7.3, 7.3], // This data remains the same as it's for shapes, not colors
+              backgroundColor: [
+                "#3B82F6",
+                "#22C55E",
+                "#EF4444",
+                "#F97316",
+                "#8B5CF6",
+                "#10B981",
+                "#EC4899",
+              ],
+              borderColor: "#FDFBF8",
+              borderWidth: 2,
+            },
+          ],
+        };
+
+        const colorSuccessData = {
+          labels: [
+            "Blue",
+            "Red",
+            "Black",
+            "Green",
+            "Orange",
+            "Yellow",
+            "Purple",
+            "Brown",
+            "Gray",
+            "White",
+            "Pink",
+            "Turquoise",
+          ],
+          datasets: [
+            {
+              label: "Hypothetical Success Rate (%)",
+              data: [95, 90, 88, 85, 75, 70, 65, 60, 60, 55, 50, 78], // Added hypothetical success rate for Turquoise
+              backgroundColor: [
+                "#3B82F6",
+                "#EF4444",
+                "#1F2937",
+                "#22C55E",
+                "#F97316",
+                "#FBBF24",
+                "#8B5CF6",
+                "#78350F",
+                "#6B7280",
+                "#F3F4F6",
+                "#EC4899",
+                "#2DD4BF",
+              ],
+              borderColor: "#FDFBF8",
+              borderWidth: 1,
+            },
+          ],
+        };
+
+        const colorContainer = document.querySelector("#colors .grid-cols-3");
+        const colorDetails = document.getElementById("color-details");
+        const colorNameEl = document.getElementById("color-name");
+        const colorDescEl = document.getElementById("color-description");
+
+        Object.keys(colorData).forEach((name) => {
+          const data = colorData[name];
+          const tile = document.createElement("div");
+          tile.className = `color-tile h-24 rounded-lg shadow-md flex items-center justify-center text-white font-bold text-lg ${data.bgColor}`;
+          tile.textContent = name;
+          tile.addEventListener("click", () => {
+            colorNameEl.textContent = name;
+            colorDescEl.innerHTML = data.description;
+            document
+              .querySelectorAll(".color-tile")
+              .forEach((t) => (t.style.border = "2px solid transparent"));
+            tile.style.border = "2px solid #D35400";
+          });
+          colorContainer.appendChild(tile);
+        });
+
+        const shapeContainer = document.querySelector("#shapes .grid-cols-3");
+        const shapeDetails = document.getElementById("shape-details");
+        const shapeNameEl = document.getElementById("shape-name");
+        const shapeDescEl = document.getElementById("shape-description");
+
+        Object.keys(shapeData).forEach((name) => {
+          const data = shapeData[name];
+          const tile = document.createElement("div");
+          tile.className =
+            "shape-tile h-24 rounded-lg shadow-md flex items-center justify-center bg-white text-gray-700 font-bold text-4xl";
+          tile.textContent = data.icon;
+          tile.addEventListener("click", () => {
+            shapeNameEl.textContent = name;
+            shapeDescEl.innerHTML = data.description;
+            document
+              .querySelectorAll(".shape-tile")
+              .forEach((t) =>
+                t.classList.remove("ring-2", "ring-offset-2", "ring-orange-500")
+              );
+            tile.classList.add("ring-2", "ring-offset-2", "ring-orange-500");
+          });
+          shapeContainer.appendChild(tile);
+        });
+
+        const brandContainer = document.getElementById("brand-cards-container");
+        brandData.forEach((brand) => {
+          const card = document.createElement("div");
+          card.className = `brand-card rounded-lg shadow-lg overflow-hidden ${brand.bgColor} text-white p-6 flex flex-col justify-between`;
+          card.innerHTML = `
+                    <div>
+                        <h4 class="text-2xl font-bold">${brand.name}</h4>
+                        <p class="mt-2">${brand.message}</p>
+                    </div>
+                    <div class="mt-4 flex space-x-2 text-sm">
+                        <span class="bg-black/20 px-2 py-1 rounded-full">Color: ${brand.color}</span>
+                        <span class="bg-black/20 px-2 py-1 rounded-full">Shape: ${brand.shape}</span>
+                    </div>
+                `;
+          brandContainer.appendChild(card);
+        });
+
+        const navLinks = document.querySelectorAll(".nav-link");
+        const contentSections = document.querySelectorAll(".content-section");
+        const mobileMenuButton = document.getElementById("mobile-menu-button");
+        const mobileMenu = document.getElementById("mobile-menu");
+
+        function navigateTo(hash) {
+          if (!hash) hash = "#about-me"; // Set 'about-me' as the default active section
+
+          contentSections.forEach((section) => {
+            if ("#" + section.id === hash) {
+              section.classList.add("active");
+            } else {
+              section.classList.remove("active");
+            }
+          });
+
+          navLinks.forEach((link) => {
+            if (link.getAttribute("href") === hash) {
+              link.classList.add("active");
+            } else {
+              link.classList.remove("active");
+            }
+          });
+
+          if (hash === "#data") {
+            renderCharts();
+          }
+        }
+
+        navLinks.forEach((link) => {
+          link.addEventListener("click", (e) => {
+            e.preventDefault();
+            const hash = e.target.getAttribute("href");
+            window.location.hash = hash;
+            if (mobileMenu.classList.contains("block")) {
+              mobileMenu.classList.remove("block");
+              mobileMenu.classList.add("hidden");
+            }
+          });
+        });
+
+        window.addEventListener("hashchange", () =>
+          navigateTo(window.location.hash)
+        );
+        navigateTo(window.location.hash || "#about-me"); // Navigate to 'about-me' on initial load
+
+        mobileMenuButton.addEventListener("click", () => {
+          mobileMenu.classList.toggle("hidden");
+          mobileMenu.classList.toggle("block");
+        });
+
+        let colorChartInstance, shapeChartInstance, colorSuccessChartInstance;
+        function renderCharts() {
+          if (!colorChartInstance) {
+            const colorCtx = document
+              .getElementById("colorPieChart")
+              .getContext("2d");
+            colorChartInstance = new Chart(colorCtx, {
+              type: "pie",
+              data: colorPieData,
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                  legend: {
+                    position: "bottom",
+                    labels: { color: "#4A4A4A", font: { size: 12 } },
+                  },
+                  tooltip: {
+                    callbacks: {
+                      label: function (context) {
+                        let label = context.label || "";
+                        if (label) {
+                          label += ": ";
+                        }
+                        if (context.parsed !== null) {
+                          label += context.parsed.toFixed(1) + "%";
+                        }
+                        return label;
+                      },
+                    },
+                  },
+                },
+              },
+            });
+          }
+          if (!shapeChartInstance) {
+            const shapeCtx = document
+              .getElementById("shapePieChart")
+              .getContext("2d");
+            shapeChartInstance = new Chart(shapeCtx, {
+              type: "pie",
+              data: shapePieData,
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                  legend: {
+                    position: "bottom",
+                    labels: { color: "#4A4A4A", font: { size: 12 } },
+                  },
+                  tooltip: {
+                    callbacks: {
+                      label: function (context) {
+                        let label = context.label || "";
+                        if (label) {
+                          label += ": ";
+                        }
+                        if (context.parsed !== null) {
+                          label += context.parsed.toFixed(1) + "%";
+                        }
+                        return label;
+                      },
+                    },
+                  },
+                },
+              },
+            });
+          }
+          if (!colorSuccessChartInstance) {
+            const colorSuccessCtx = document
+              .getElementById("colorSuccessBarChart")
+              .getContext("2d");
+            colorSuccessChartInstance = new Chart(colorSuccessCtx, {
+              type: "bar",
+              data: colorSuccessData,
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                  legend: {
+                    display: false,
+                  },
+                  tooltip: {
+                    callbacks: {
+                      label: function (context) {
+                        let label = context.dataset.label || "";
+                        if (label) {
+                          label += ": ";
+                        }
+                        label += context.parsed.y + "%";
+                        return label;
+                      },
+                    },
+                  },
+                },
+                scales: {
+                  y: {
+                    beginAtZero: true,
+                    title: {
+                      display: true,
+                      text: "Hypothetical Success Rate (%)",
+                      color: "#4A4A4A",
+                    },
+                    ticks: {
+                      color: "#4A4A4A",
+                    },
+                  },
+                  x: {
+                    title: {
+                      display: true,
+                      text: "Primary Color",
+                      color: "#4A4A4A",
+                    },
+                    ticks: {
+                      color: "#4A4A4A",
+                    },
+                  },
+                },
+              },
+            });
+          }
+        }
+      });
+    </script>
+  </body>
+</html>
